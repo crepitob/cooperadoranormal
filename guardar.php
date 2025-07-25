@@ -1,24 +1,29 @@
 <?php
-$conexion = new mysqli("localhost", "root", "2612sanTI76+", "cooperadoraenu");
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $conexion = new mysqli("localhost", "root", "2612sanTI76+", "cooperadoraenu");
 
-if ($conexion->connect_error) {
-    die("Conexión fallida: " . $conexion->connect_error);
-}
+    if ($conexion->connect_error) {
+        die("Error de conexión: " . $conexion->connect_error);
+    }
 
-$nombre = $_POST['nombre'];
-$apellido = $_POST['apellido'];
-$telefono = $_POST['telefono'];
+    $nombre = $_POST["nombre"];
+    $apellido = $_POST["apellido"];
+    $telefono = $_POST["telefono"]; // importante: name en minúscula
 
-$sql = "INSERT INTO personas (nombre,apellido, telefono ) VALUES ('$nombre', '$apellido', '$telefono')";
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("ss", $nombre, $apellido, $telefono);
+    $sql = "INSERT INTO personas (nombre, apellido, telefono) VALUES (?, ?, ?)";
+    $stmt = $conexion->prepare($sql);
+    $stmt->bind_param("sss", $nombre, $apellido, $telefono);
 
-if ($stmt->execute()) {
-    echo "Datos guardados correctamente.";
+    if ($stmt->execute()) {
+        echo "Datos guardados correctamente.";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
+    $conexion->close();
 } else {
-    echo "Error al guardar.";
+    http_response_code(405);
+    echo "Método no permitido";
 }
-
-$stmt->close();
-$conexion->close();
 ?>
